@@ -47,7 +47,9 @@ develop ──PR/merge──> main ──> GitHub Actions construye imágenes en
 ## Principios de seguridad
 
 - Nunca guardar contraseñas, tokens, ficheros `.env`, claves privadas ni estados de Terraform en Git.
-- Usar secretos cifrados con SOPS + age cuando se llegue a la fase GitOps.
+- Los secretos GitOps se almacenan cifrados con SOPS + age. La identidad
+  privada se conserva exclusivamente en el VPS/Flux y en una copia de
+  recuperación local ignorada por Git.
 - PostgreSQL no se expondrá a Internet.
 - El tráfico público será únicamente HTTPS cuando se conecte el dominio.
 - Las copias de seguridad y su restauración se probarán antes de considerar listo el entorno.

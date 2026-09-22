@@ -23,6 +23,10 @@ spec:
   retryInterval: 1m0s
   path: ./kubernetes/clusters/production
   prune: true
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   sourceRef:
     kind: GitRepository
     name: flux-system

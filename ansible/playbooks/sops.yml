@@ -91,6 +91,13 @@
         validate_checksum: true
       no_log: true
 
+    - name: Restrict the local recovery-copy permissions
+      ansible.builtin.file:
+        path: "{{ sops_age_backup_path }}"
+        mode: '0600'
+      delegate_to: localhost
+      become: false
+
     - name: Report the safe public recipient for .sops.yaml
       ansible.builtin.debug:
         msg: "SOPS_AGE_RECIPIENT={{ sops_age_recipient.stdout }}"
