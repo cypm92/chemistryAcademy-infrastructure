@@ -22,6 +22,9 @@ ejecutar Ansible, créalo a partir del ejemplo:
 cp inventory/production.ini.example inventory/production.ini
 ```
 
+Edita la ruta `ansible_ssh_private_key_file` para que apunte a la copia de la
+clave dentro de tu directorio personal de WSL.
+
 ## Ejecutarlo desde Windows con WSL
 
 La ejecución se hace desde WSL, no desde PowerShell nativo. Instala las
@@ -45,13 +48,13 @@ chmod 600 ~/.ssh/beciencia_vps_ed25519
 Desde este directorio, primero valida sin cambiar el servidor:
 
 ```bash
-ansible-playbook playbooks/bootstrap.yml --check --diff
+ansible-playbook -i inventory/production.ini playbooks/bootstrap.yml --ask-become-pass --check --diff
 ```
 
 Después, para aplicar los cambios:
 
 ```bash
-ansible-playbook playbooks/bootstrap.yml
+ansible-playbook -i inventory/production.ini playbooks/bootstrap.yml --ask-become-pass
 ```
 
 Al terminar, verifica una nueva conexión desde otra terminal antes de cerrar la

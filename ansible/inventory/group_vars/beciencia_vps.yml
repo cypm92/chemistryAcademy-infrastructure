@@ -3,6 +3,9 @@
 # authenticated exclusively with the SSH key installed before this playbook runs.
 admin_user: ubuntu
 ssh_port: 22
+# Avoid the SFTP issue that can occur when Ansible is launched from WSL against
+# a repository mounted from Windows. This still uses the encrypted SSH channel.
+ansible_ssh_transfer_method: piped
 ssh_allowed_tcp_ports:
   - 80
   - 443
