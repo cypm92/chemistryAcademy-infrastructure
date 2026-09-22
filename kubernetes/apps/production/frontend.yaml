@@ -34,6 +34,8 @@ spec:
         app.kubernetes.io/part-of: beciencia
     spec:
       automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: ghcr-pull
       securityContext:
         seccompProfile:
           type: RuntimeDefault
