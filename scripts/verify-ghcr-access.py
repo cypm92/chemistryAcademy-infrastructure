@@ -4,6 +4,7 @@
 Never print the Secret, registry credentials, or bearer tokens.
 """
 
+import argparse
 import base64
 import json
 from pathlib import Path
@@ -94,6 +95,12 @@ def github_token_valid(username: str, password: str) -> bool:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description="Check private GHCR image access")
+    parser.add_argument(
+        "--image", action="append", dest="images", default=[],
+        help="Image to check instead of the production manifests; may be repeated",
+    )
+    args = parser.parse_args()
     # The caller pipes SOPS output directly here: no plaintext file is created.
     secret = yaml.safe_load(sys.stdin)
     if not isinstance(secret, dict):
@@ -114,7 +121,9 @@ def main() -> int:
     authorization = f"Basic {basic}"
 
     failed = False
-    for image in image_references():
+    for image in args.images or image_references():
+        if not re.fullmatch(r"ghcr\.io/cypm92/[a-z0-9-]+:([a-z0-9-]+)", image):
+            raise ValueError("La referencia de imagen no tiene el formato esperado")
         repository_and_tag = image.removeprefix("ghcr.io/")
         repository, tag = repository_and_tag.rsplit(":", 1)
         authenticated = manifest_status(

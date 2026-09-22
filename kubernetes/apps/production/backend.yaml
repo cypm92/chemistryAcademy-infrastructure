@@ -45,7 +45,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: backend
-          image: ghcr.io/cypm92/chemistryacademy-backend:sha-523d863e77fb2d94c0224f1a5eaa94e6d114bc2e
+          image: ghcr.io/cypm92/beciencia-backend:sha-523d863e77fb2d94c0224f1a5eaa94e6d114bc2e
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

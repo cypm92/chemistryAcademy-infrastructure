@@ -6,12 +6,13 @@ visibilidad debe comprobarse expresamente: un paquete vinculado a un
 repositorio puede heredar su visibilidad al publicarse.
 
 **Estado detectado el 22-09-2026:** las primeras imágenes
-`chemistryacademy-frontend` y `chemistryacademy-backend` son accesibles
-anónimamente. El token es válido, pero la verificación de privacidad falla.
-GitHub indica que un paquete ya hecho público no puede volver a privado;
-para mantener imágenes privadas habrá que publicar paquetes nuevos con otros
-nombres, verificar su visibilidad y actualizar las referencias de Kubernetes.
-No activar aún la aplicación con estos manifiestos.
+`chemistryacademy-frontend` y `chemistryacademy-backend` resultaron públicas.
+GitHub indica que un paquete ya hecho público no puede volver a privado.
+El 23-09-2026 se crearon por separado `beciencia-frontend` y
+`beciencia-backend`; GitHub
+confirma su visibilidad privada y la prueba de registro rechaza la descarga
+anónima. Los manifiestos de Kubernetes apuntan únicamente a estos paquetes
+privados.
 
 ## Preparación en GitHub
 
