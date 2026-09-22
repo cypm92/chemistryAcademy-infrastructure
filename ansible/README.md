@@ -97,3 +97,41 @@ Para comprobarlo desde el VPS:
 ssh -i ~/.ssh/beciencia_vps_ed25519 ubuntu@51.254.216.174 \
   'kubectl get nodes && kubectl get pods -A'
 ```
+
+## Instalar Flux CD
+
+`playbooks/flux.yml` instala únicamente `source-controller` y
+`kustomize-controller` de Flux. Con ello el clúster puede leer el repositorio
+privado de infraestructura y aplicar los manifiestos declarados en `main`; no
+instala controladores que aún no usamos (Helm, notificaciones ni automatización
+de imágenes).
+
+El playbook descarga una versión y checksum fijados de Flux, valida que la
+clave de despliegue puede leer la rama `main` y guarda esa clave solo como un
+Secret de Kubernetes. La clave privada no se versiona ni se registra en la
+salida de Ansible.
+
+Desde WSL, copia la clave de Flux a su directorio SSH privado una sola vez:
+
+```bash
+cp /mnt/c/Users/TU_USUARIO_WINDOWS/.ssh/beciencia_flux_deploy_ed25519 \
+  /home/TU_USUARIO_WSL/.ssh/
+cp /mnt/c/Users/TU_USUARIO_WINDOWS/.ssh/beciencia_flux_deploy_ed25519.pub \
+  /home/TU_USUARIO_WSL/.ssh/
+chmod 600 /home/TU_USUARIO_WSL/.ssh/beciencia_flux_deploy_ed25519
+```
+
+Después ejecuta el playbook indicando solo la ruta local de esa clave:
+
+```bash
+ansible-playbook -i inventory/production.ini playbooks/flux.yml \
+  -e flux_deploy_key_path=/home/TU_USUARIO_WSL/.ssh/beciencia_flux_deploy_ed25519
+```
+
+Comprueba el estado desde el VPS:
+
+```bash
+K3S_CONFIG_FILE=/dev/null kubectl get pods -n flux-system
+K3S_CONFIG_FILE=/dev/null flux get sources git -A
+K3S_CONFIG_FILE=/dev/null flux get kustomizations -A
+```

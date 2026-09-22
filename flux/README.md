@@ -1,5 +1,14 @@
 # Flux CD
 
-Flux observará este repositorio y aplicará el directorio de producción. El bootstrap se hará una sola vez desde un equipo administrado; posteriormente, los cambios de versión se revisarán mediante Git.
+Flux observa exclusivamente `main` de `cypm92/chemistryAcademy-infrastructure`
+y aplica `kubernetes/clusters/production` mediante Kustomize. El manifiesto
+que define esta sincronización vive en:
 
-Este directorio no contiene aún credenciales ni una instalación activa de Flux.
+`kubernetes/clusters/production/flux-system/gotk-sync.yaml`.
+
+Los controladores se instalan con el playbook Ansible `playbooks/flux.yml` y
+la clave SSH de solo lectura se guarda como Secret dentro del clúster. No hay
+credenciales en este repositorio.
+
+Una publicación en GHCR no cambia el clúster por sí misma. Solo se despliega
+una imagen cuando un manifiesto con su etiqueta inmutable llega a `main`.
