@@ -135,3 +135,28 @@ K3S_CONFIG_FILE=/dev/null kubectl get pods -n flux-system
 K3S_CONFIG_FILE=/dev/null flux get sources git -A
 K3S_CONFIG_FILE=/dev/null flux get kustomizations -A
 ```
+
+## Configurar secretos cifrados con SOPS + age
+
+SOPS cifra los valores confidenciales antes de que lleguen a Git. `age` aporta
+la identidad criptográfica: su destinatario público se puede versionar en
+`.sops.yaml`, pero su clave privada **no** se sube a Git ni se comparte.
+Flux recibe una copia de esa identidad como el Secret `sops-age` y la usa solo
+para descifrar manifiestos declarados en el repositorio.
+
+Este playbook genera la identidad una única vez en el VPS y guarda además una
+copia de recuperación en WSL, fuera de los repositorios. Esa copia es crítica:
+sin ella no se podrán descifrar secretos antiguos al recuperar o migrar el
+servidor. Debe incluirse posteriormente en la copia de seguridad cifrada y
+fuera del VPS.
+
+Ejecuta desde WSL (la ruta indicada queda fuera de Git):
+
+```bash
+ansible-playbook -i inventory/production.ini playbooks/sops.yml \
+  -e sops_age_backup_path=/home/TU_USUARIO_WSL/.config/beciencia/sops/age.agekey
+```
+
+El último mensaje muestra `SOPS_AGE_RECIPIENT=age1...`. Ese valor es público;
+se añade a `.sops.yaml` para que los futuros secretos se puedan cifrar. Nunca
+copies ni publiques el contenido de `age.agekey`.

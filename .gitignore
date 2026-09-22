@@ -6,6 +6,7 @@
 *.key
 *.p12
 *.age
+*.agekey
 age-key.txt
 
 # OpenTofu / Terraform: el estado se almacenará en un backend remoto

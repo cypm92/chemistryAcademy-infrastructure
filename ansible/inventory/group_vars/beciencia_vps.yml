@@ -26,5 +26,10 @@ flux_git_branch: main
 flux_sync_path: ./kubernetes/clusters/production
 flux_github_known_host: github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
 
+# SOPS uses this age identity on the VPS. The recovery copy is deliberately
+# supplied at playbook runtime and never belongs in this repository.
+sops_age_key_path: /etc/beciencia/sops/age.agekey
+sops_age_secret_name: sops-age
+
 # Deliberately no secrets belong in this repository. Application credentials
 # will be encrypted with SOPS in a later stage.
