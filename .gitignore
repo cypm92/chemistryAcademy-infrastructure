@@ -30,3 +30,4 @@ ansible/inventory/production.ini
 Thumbs.db
 .idea/
 .vscode/
+__pycache__/
