@@ -48,9 +48,12 @@
         name: root
         password_lock: true
 
-    - name: Install hardened SSH configuration
+    - name: Install hardened SSH configuration before cloud-init settings
       ansible.builtin.copy:
-        dest: /etc/ssh/sshd_config.d/99-beciencia-hardening.conf
+        # sshd uses the first value it encounters for these settings. Ubuntu's
+        # cloud-init drop-in can enable password authentication, so this file
+        # must sort before it rather than after it.
+        dest: /etc/ssh/sshd_config.d/00-beciencia-hardening.conf
         owner: root
         group: root
         mode: '0644'
@@ -66,7 +69,16 @@
           LoginGraceTime 30
           ClientAliveInterval 300
           ClientAliveCountMax 2
-        validate: /usr/sbin/sshd -t -f %s
+      notify: Restart SSH
+
+    - name: Validate complete SSH server configuration
+      ansible.builtin.command: /usr/sbin/sshd -t
+      changed_when: false
+
+    - name: Remove legacy SSH hardening drop-in
+      ansible.builtin.file:
+        path: /etc/ssh/sshd_config.d/99-beciencia-hardening.conf
+        state: absent
       notify: Restart SSH
 
     - name: Configure Fail2ban for SSH
