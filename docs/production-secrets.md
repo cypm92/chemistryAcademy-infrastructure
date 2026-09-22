@@ -1,8 +1,17 @@
 # Credenciales para la primera puesta en producción
 
-Los contenedores de frontend y backend se publican en GHCR como paquetes
-privados. Kubernetes necesita una credencial de solo lectura para descargarlos.
-GitHub crea los paquetes privados por defecto en su primera publicación.
+El objetivo es publicar frontend y backend en GHCR como paquetes privados.
+Kubernetes necesita una credencial de solo lectura para descargarlos. La
+visibilidad debe comprobarse expresamente: un paquete vinculado a un
+repositorio puede heredar su visibilidad al publicarse.
+
+**Estado detectado el 22-09-2026:** las primeras imágenes
+`chemistryacademy-frontend` y `chemistryacademy-backend` son accesibles
+anónimamente. El token es válido, pero la verificación de privacidad falla.
+GitHub indica que un paquete ya hecho público no puede volver a privado;
+para mantener imágenes privadas habrá que publicar paquetes nuevos con otros
+nombres, verificar su visibilidad y actualizar las referencias de Kubernetes.
+No activar aún la aplicación con estos manifiestos.
 
 ## Preparación en GitHub
 
