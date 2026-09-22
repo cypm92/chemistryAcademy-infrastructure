@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: beciencia-settings
+  namespace: beciencia
+  labels:
+    app.kubernetes.io/part-of: beciencia
+data:
+  POSTGRES_USER: chemistry
+  POSTGRES_DB: chemistry_academy
+  ACCESS_TOKEN_EXPIRE_MINUTES: "480"
+  ADMIN_NAME: Administradora
+  ADMIN_EMAIL: admin@beciencia.example
+  STORAGE_DIR: /app/storage
