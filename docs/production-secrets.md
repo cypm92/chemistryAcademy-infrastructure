@@ -51,3 +51,21 @@ verificar que las imágenes existen con etiquetas `sha-<commit>`.
 La clave privada age que permite descifrar los ficheros se guarda fuera del
 repositorio, en el VPS y en la copia de recuperación de WSL creada en el paso
 anterior. Conserva esa copia también en una copia de seguridad externa cifrada.
+
+## Verificar el acceso a las imágenes
+
+Desde WSL, con `sops`, `python3` y `python3-yaml` disponibles, ejecuta desde la
+raíz del repositorio:
+
+```bash
+set -o pipefail
+SOPS_AGE_KEY_FILE=/ruta/privada/age.agekey sops decrypt \
+  kubernetes/clusters/production/ghcr-pull.sops.yaml | \
+  python3 scripts/verify-ghcr-access.py
+```
+
+El Secret descifrado pasa únicamente por una tubería en memoria. El programa
+comprueba que el token pertenece a `cypm92`, tiene `read:packages`, descarga
+ambas etiquetas inmutables y que las imágenes no son accesibles anónimamente.
+Solo imprime resultados, nunca las credenciales. Si alguna comprobación falla,
+no actives la aplicación todavía.
