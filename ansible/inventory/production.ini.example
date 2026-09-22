@@ -1,0 +1,5 @@
+[beciencia_vps]
+production ansible_host=YOUR_VPS_IP ansible_user=ubuntu ansible_port=22
+
+[beciencia_vps:vars]
+ansible_python_interpreter=/usr/bin/python3

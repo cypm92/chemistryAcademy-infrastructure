@@ -1,0 +1,11 @@
+---
+# Ubuntu is the initial OVH user. It remains the single administrative user,
+# authenticated exclusively with the SSH key installed before this playbook runs.
+admin_user: ubuntu
+ssh_port: 22
+ssh_allowed_tcp_ports:
+  - 80
+  - 443
+
+# Deliberately no secrets belong in this repository. Application credentials
+# will be encrypted with SOPS in a later stage.

@@ -22,6 +22,7 @@ override.tf.json
 # Ansible
 *.retry
 ansible/inventory/production.yml
+ansible/inventory/production.ini
 
 # Sistema y editores
 .DS_Store
