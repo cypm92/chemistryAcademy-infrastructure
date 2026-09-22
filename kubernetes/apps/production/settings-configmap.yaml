@@ -9,6 +9,6 @@ data:
   POSTGRES_USER: chemistry
   POSTGRES_DB: chemistry_academy
   ACCESS_TOKEN_EXPIRE_MINUTES: "480"
-  ADMIN_NAME: Administradora
-  ADMIN_EMAIL: admin@beciencia.example
+  ADMIN_NAME: Cresko Puyana
+  ADMIN_EMAIL: cresko.puyana@gmail.com
   STORAGE_DIR: /app/storage
