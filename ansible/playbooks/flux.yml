@@ -96,6 +96,8 @@
           -o IdentitiesOnly=yes
           -o UserKnownHostsFile=/etc/beciencia/flux/known_hosts
           -o StrictHostKeyChecking=yes
+          -o BatchMode=yes
+          -o ConnectTimeout=10
       changed_when: false
       when: not ansible_check_mode
 
