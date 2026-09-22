@@ -1,0 +1,40 @@
+name: CI infraestructura
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: infrastructure-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validar repositorio
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Comprobar espacios y marcadores de conflicto
+        shell: bash
+        run: |
+          git diff --check "$(git hash-object -t tree /dev/null)" HEAD
+          if git grep --line-number --extended-regexp '^(<<<<<<<|=======|>>>>>>>)'; then
+            echo 'Se han encontrado marcadores de conflicto.' >&2
+            exit 1
+          fi
+      - name: Impedir estados y secretos locales versionados
+        shell: bash
+        run: |
+          forbidden_files='(^|/)(\.env|.*\.tfstate|.*\.pem|.*\.key|age-key\.txt)$'
+          if git ls-files | grep -E "$forbidden_files"; then
+            echo 'Hay un fichero sensible o de estado versionado.' >&2
+            exit 1
+          fi
