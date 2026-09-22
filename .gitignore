@@ -1,0 +1,30 @@
+# Secretos y variables locales
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.age
+age-key.txt
+
+# OpenTofu / Terraform: el estado se almacenará en un backend remoto
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ansible
+*.retry
+ansible/inventory/production.yml
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
