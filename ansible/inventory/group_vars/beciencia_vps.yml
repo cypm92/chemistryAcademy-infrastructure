@@ -10,5 +10,13 @@ ssh_allowed_tcp_ports:
   - 80
   - 443
 
+# Se fija una versión concreta para que una reconstrucción no descargue una
+# versión distinta de Kubernetes de forma silenciosa. Las actualizaciones se
+# harán en un cambio independiente y revisado.
+k3s_version: v1.35.4+k3s1
+k3s_config_dir: /etc/rancher/k3s
+k3s_kubeconfig_path: /etc/rancher/k3s/k3s.yaml
+k3s_admin_kubeconfig_path: "/home/{{ admin_user }}/.kube/config"
+
 # Deliberately no secrets belong in this repository. Application credentials
 # will be encrypted with SOPS in a later stage.

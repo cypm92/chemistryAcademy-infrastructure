@@ -1,0 +1,110 @@
+---
+- name: Install and configure the Be Ciencia single-node K3s cluster
+  hosts: beciencia_vps
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Assert that the target is Ubuntu
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.distribution == 'Ubuntu'
+        fail_msg: This playbook is designed for an Ubuntu VPS.
+
+  tasks:
+    - name: Install K3s prerequisites
+      ansible.builtin.apt:
+        name:
+          - iptables
+          - socat
+          - conntrack
+        state: present
+        update_cache: true
+
+    - name: Create the K3s configuration directory
+      ansible.builtin.file:
+        path: "{{ k3s_config_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Configure K3s server
+      ansible.builtin.copy:
+        dest: "{{ k3s_config_dir }}/config.yaml"
+        owner: root
+        group: root
+        mode: '0600'
+        content: |
+          # This is a single-node production cluster. Do not add another
+          # server without reviewing the architecture and recovery procedure.
+          cluster-init: true
+          disable:
+            - traefik
+            - servicelb
+          write-kubeconfig-mode: "0640"
+          write-kubeconfig-group: "{{ admin_user }}"
+          secrets-encryption: true
+          flannel-backend: vxlan
+          etcd-snapshot-schedule-cron: "0 */12 * * *"
+          etcd-snapshot-retention: 7
+      notify: Restart K3s
+
+    - name: Check installed K3s version
+      ansible.builtin.command: /usr/local/bin/k3s --version
+      register: k3s_installed_version
+      changed_when: false
+      failed_when: false
+
+    - name: Install pinned K3s version
+      ansible.builtin.shell: |
+        set -o pipefail
+        curl --fail --silent --show-error --location https://get.k3s.io | sh -
+      args:
+        executable: /bin/bash
+      environment:
+        INSTALL_K3S_VERSION: "{{ k3s_version }}"
+      when:
+        - not ansible_check_mode
+        - k3s_version not in k3s_installed_version.stdout
+
+    - name: Ensure K3s service is enabled and started
+      ansible.builtin.service:
+        name: k3s
+        enabled: true
+        state: started
+      when: not ansible_check_mode
+
+    - name: Wait for Kubernetes API to become ready
+      ansible.builtin.command: /usr/local/bin/k3s kubectl get --raw=/readyz
+      register: k3s_readiness
+      changed_when: false
+      retries: 30
+      delay: 5
+      until: k3s_readiness.rc == 0 and 'ok' in k3s_readiness.stdout
+      when: not ansible_check_mode
+
+    - name: Create Kubernetes configuration directory for the administrator
+      ansible.builtin.file:
+        path: "/home/{{ admin_user }}/.kube"
+        state: directory
+        owner: "{{ admin_user }}"
+        group: "{{ admin_user }}"
+        mode: '0700'
+
+    - name: Provide local kubectl configuration to the administrator
+      ansible.builtin.copy:
+        src: "{{ k3s_kubeconfig_path }}"
+        dest: "{{ k3s_admin_kubeconfig_path }}"
+        remote_src: true
+        owner: "{{ admin_user }}"
+        group: "{{ admin_user }}"
+        mode: '0600'
+      when: not ansible_check_mode
+
+  handlers:
+    - name: Restart K3s
+      ansible.builtin.service:
+        name: k3s
+        state: restarted
+      when: not ansible_check_mode

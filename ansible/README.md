@@ -1,8 +1,8 @@
 # Ansible: bootstrap del VPS
 
-Este directorio contiene el endurecimiento reproducible del VPS de producción.
-No instala aún Kubernetes ni la aplicación: esas piezas se añadirán en pasos
-posteriores, una vez tengamos el servidor base verificado.
+Este directorio contiene el endurecimiento reproducible del VPS de producción
+y la instalación del clúster K3s. La aplicación se añadirá posteriormente por
+GitOps, una vez se hayan publicado sus imágenes de contenedor.
 
 ## Qué aplica `playbooks/bootstrap.yml`
 
@@ -66,4 +66,34 @@ sesión existente:
 
 ```bash
 ssh -i ~/.ssh/beciencia_vps_ed25519 ubuntu@51.254.216.174
+```
+
+## Instalar K3s
+
+`playbooks/k3s.yml` instala una versión fijada de K3s (Kubernetes ligero) en un
+único nodo. Conserva CoreDNS, métricas y el almacenamiento local de K3s, pero
+desactiva Traefik y ServiceLB: más adelante Caddy ocupará los puertos públicos
+80 y 443 para servir la web y gestionar HTTPS.
+
+El clúster usa etcd integrado, cifra los secretos de Kubernetes en reposo y
+crea snapshots locales cada 12 horas. Esos snapshots no sustituyen una copia
+externa, que se configurará antes de producción.
+
+Primero valida el playbook:
+
+```bash
+ansible-playbook -i inventory/production.ini playbooks/k3s.yml --check --diff
+```
+
+Después aplícalo:
+
+```bash
+ansible-playbook -i inventory/production.ini playbooks/k3s.yml
+```
+
+Para comprobarlo desde el VPS:
+
+```bash
+ssh -i ~/.ssh/beciencia_vps_ed25519 ubuntu@51.254.216.174 \
+  'kubectl get nodes && kubectl get pods -A'
 ```
