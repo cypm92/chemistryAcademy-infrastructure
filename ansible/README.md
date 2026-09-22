@@ -51,6 +51,10 @@ Desde este directorio, primero valida sin cambiar el servidor:
 ansible-playbook -i inventory/production.ini playbooks/bootstrap.yml --ask-become-pass --check --diff
 ```
 
+En un VPS recién instalado, la simulación omite las reglas de UFW y los
+reinicios de servicios: esos componentes aún no existen hasta la ejecución
+real. El resto del playbook se valida sin modificar el servidor.
+
 Después, para aplicar los cambios:
 
 ```bash
