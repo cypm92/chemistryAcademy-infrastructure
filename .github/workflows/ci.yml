@@ -45,3 +45,6 @@ jobs:
             docker run --rm -i \
               ghcr.io/yannh/kubeconform@sha256:85dbef6b4b312b99133decc9c6fc9495e9fc5f92293d4ff3b7e1b30f5611823c \
               -strict -summary
+      - name: Renderizar la composición completa de producción
+        shell: bash
+        run: kubectl kustomize kubernetes/clusters/production > /dev/null
