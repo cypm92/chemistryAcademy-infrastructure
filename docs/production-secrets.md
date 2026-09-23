@@ -24,9 +24,13 @@ contraseñas: cuando caduque habrá que renovarlo antes del siguiente despliegue
 El token solo se muestra una vez al crearlo. No lo pegues en Git ni en un chat.
 
 Después de publicar las imágenes, comprueba en GitHub que
-`chemistryacademy-frontend` y `chemistryacademy-backend` figuran como
-**Private** en los paquetes de la cuenta. Si alguno figura como público, no
-guardes el token pensando que la imagen quedó protegida: revisa la visibilidad.
+`beciencia-frontend` y `beciencia-backend` figuran como **Private** en los
+paquetes de la cuenta. Los repositorios públicos de frontend y backend tienen
+acceso de escritura únicamente a su paquete correspondiente para publicar
+desde `main`; GitHub advierte que los forks de esos repositorios podrían
+acceder a las imágenes privadas. Ninguna credencial de producción se incluye
+en las imágenes. Si alguno de los paquetes figura como público, no guardes el
+token pensando que la imagen quedó protegida: revisa la visibilidad.
 
 ## Generación local del Secret cifrado
 

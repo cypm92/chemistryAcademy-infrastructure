@@ -17,7 +17,12 @@ Poder reconstruir el servicio en un servidor Ubuntu nuevo con cambios auditables
 
 ## Estado actual
 
-La estructura está creada, pero **no aplica cambios al VPS ni crea recursos de pago**. Cada capa se implementará y verificará en una tarea independiente.
+El VPS ya está preparado con Ansible y ejecuta K3s y Flux CD. Flux observa
+`main` de este repositorio, pero la composición activa solo incluye su propia
+configuración: PostgreSQL, backend y frontend aún no se han activado. Los
+Secrets de producción están cifrados con SOPS + age y las imágenes de la
+aplicación se publican desde `main` de sus respectivos repositorios en paquetes
+privados de GHCR. No se ha creado ningún recurso de pago adicional.
 
 ## Estructura
 
@@ -56,4 +61,8 @@ develop ──PR/merge──> main ──> GitHub Actions construye imágenes en
 
 ## Siguiente tarea
 
-Configurar las protecciones de ramas y las comprobaciones de CI en los tres repositorios, manteniendo el despliegue reservado exclusivamente para `main`.
+Revisar y activar explícitamente la composición de la aplicación en
+`kubernetes/clusters/production`, comprobar los Pods y realizar las pruebas de
+acceso y recuperación. Antes de considerar terminado el CI/CD, automatizar
+también la actualización de las etiquetas inmutables en este repositorio tras
+publicar nuevas imágenes en GHCR.
