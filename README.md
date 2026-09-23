@@ -18,11 +18,11 @@ Poder reconstruir el servicio en un servidor Ubuntu nuevo con cambios auditables
 ## Estado actual
 
 El VPS ya está preparado con Ansible y ejecuta K3s y Flux CD. Flux observa
-`main` de este repositorio, pero la composición activa solo incluye su propia
-configuración: PostgreSQL, backend y frontend aún no se han activado. Los
-Secrets de producción están cifrados con SOPS + age y las imágenes de la
-aplicación se publican desde `main` de sus respectivos repositorios en paquetes
-privados de GHCR. No se ha creado ningún recurso de pago adicional.
+`main` de este repositorio y mantiene PostgreSQL, backend y frontend dentro
+del clúster. Los Secrets de producción están cifrados con SOPS + age y las
+imágenes se publican desde `main` de sus respectivos repositorios en paquetes
+privados de GHCR. No hay Ingress ni dominio configurado: la aplicación aún no
+está expuesta públicamente. No se ha creado ningún recurso de pago adicional.
 
 ## Estructura
 
@@ -61,8 +61,7 @@ develop ──PR/merge──> main ──> GitHub Actions construye imágenes en
 
 ## Siguiente tarea
 
-Revisar y activar explícitamente la composición de la aplicación en
-`kubernetes/clusters/production`, comprobar los Pods y realizar las pruebas de
-acceso y recuperación. Antes de considerar terminado el CI/CD, automatizar
-también la actualización de las etiquetas inmutables en este repositorio tras
-publicar nuevas imágenes en GHCR.
+Diseñar y probar copias de seguridad y restauración de PostgreSQL y archivos
+antes de abrir la web al público. Después, automatizar la actualización de las
+etiquetas inmutables en este repositorio tras publicar nuevas imágenes en GHCR.
+El dominio, HTTPS y la exposición pública quedan para el último paso.
