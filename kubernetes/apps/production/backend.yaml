@@ -1,0 +1,138 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: beciencia
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: beciencia
+spec:
+  selector:
+    app.kubernetes.io/name: backend
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: beciencia
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: beciencia
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: backend
+        app.kubernetes.io/part-of: beciencia
+    spec:
+      automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: ghcr-pull
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: backend
+          image: ghcr.io/cypm92/beciencia-backend:sha-79691c9e9dd2087fbe835fc6468d080367a48d36
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: beciencia-runtime
+                  key: DATABASE_URL
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: beciencia-runtime
+                  key: SECRET_KEY
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: beciencia-runtime
+                  key: ADMIN_PASSWORD
+            - name: ACCESS_TOKEN_EXPIRE_MINUTES
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: ACCESS_TOKEN_EXPIRE_MINUTES
+            - name: ADMIN_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: ADMIN_NAME
+            - name: ADMIN_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: ADMIN_EMAIL
+            - name: STORAGE_DIR
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: STORAGE_DIR
+          volumeMounts:
+            - name: storage
+              mountPath: /app/storage
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 200m
+              memory: 384Mi
+            limits:
+              cpu: "1"
+              memory: 768Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: beciencia-files
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: beciencia-files
+  namespace: beciencia
+  labels:
+    app.kubernetes.io/part-of: beciencia
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 15Gi

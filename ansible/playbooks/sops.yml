@@ -1,0 +1,103 @@
+---
+- name: Configure the Be Ciencia SOPS age identity for Flux
+  hosts: beciencia_vps
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Require an ignored local path for the recovery copy
+      ansible.builtin.assert:
+        that:
+          - sops_age_backup_path is defined
+          - sops_age_backup_path | length > 0
+          - sops_age_backup_path is not match('^' + playbook_dir + '/')
+        fail_msg: >-
+          Run this playbook with -e
+          sops_age_backup_path=/home/YOUR_WSL_USER/.config/beciencia/sops/age.agekey.
+          This recovery copy must live outside the infrastructure repository.
+
+  tasks:
+    - name: Install age for SOPS key management
+      ansible.builtin.apt:
+        name: age
+        state: present
+        update_cache: true
+
+    - name: Create the private SOPS key directory
+      ansible.builtin.file:
+        path: "{{ sops_age_key_path | dirname }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0700'
+
+    - name: Generate the SOPS age identity exactly once
+      ansible.builtin.command:
+        argv:
+          - age-keygen
+          - -o
+          - "{{ sops_age_key_path }}"
+      args:
+        creates: "{{ sops_age_key_path }}"
+      no_log: true
+
+    - name: Enforce restrictive permissions on the SOPS age identity
+      ansible.builtin.file:
+        path: "{{ sops_age_key_path }}"
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Read the public SOPS age recipient
+      ansible.builtin.command:
+        argv:
+          - age-keygen
+          - -y
+          - "{{ sops_age_key_path }}"
+      register: sops_age_recipient
+      changed_when: false
+
+    - name: Validate the public SOPS age recipient
+      ansible.builtin.assert:
+        that:
+          - sops_age_recipient.stdout is match('^age1[0-9a-z]+$')
+        fail_msg: The generated SOPS age public recipient is invalid.
+
+    - name: Create the Flux SOPS decryption secret
+      ansible.builtin.shell: |
+        set -o pipefail
+        /usr/local/bin/k3s kubectl --namespace {{ flux_namespace }} create secret generic {{ sops_age_secret_name }} \
+          --from-file=age.agekey={{ sops_age_key_path }} \
+          --dry-run=client --output=yaml | /usr/local/bin/k3s kubectl apply -f -
+      args:
+        executable: /bin/bash
+      register: sops_age_secret
+      changed_when: "'created' in sops_age_secret.stdout or 'configured' in sops_age_secret.stdout"
+      no_log: true
+
+    - name: Create the local recovery-copy directory
+      ansible.builtin.file:
+        path: "{{ sops_age_backup_path | dirname }}"
+        state: directory
+        mode: '0700'
+      delegate_to: localhost
+      become: false
+
+    - name: Save an off-VPS recovery copy outside Git
+      ansible.builtin.fetch:
+        src: "{{ sops_age_key_path }}"
+        dest: "{{ sops_age_backup_path }}"
+        flat: true
+        validate_checksum: true
+      no_log: true
+
+    - name: Restrict the local recovery-copy permissions
+      ansible.builtin.file:
+        path: "{{ sops_age_backup_path }}"
+        mode: '0600'
+      delegate_to: localhost
+      become: false
+
+    - name: Report the safe public recipient for .sops.yaml
+      ansible.builtin.debug:
+        msg: "SOPS_AGE_RECIPIENT={{ sops_age_recipient.stdout }}"

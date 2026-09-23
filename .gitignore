@@ -6,6 +6,7 @@
 *.key
 *.p12
 *.age
+*.agekey
 age-key.txt
 
 # OpenTofu / Terraform: el estado se almacenará en un backend remoto
@@ -22,9 +23,11 @@ override.tf.json
 # Ansible
 *.retry
 ansible/inventory/production.yml
+ansible/inventory/production.ini
 
 # Sistema y editores
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
+__pycache__/

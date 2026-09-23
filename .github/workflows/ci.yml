@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   validate:
-    name: Validar repositorio
+    name: CI infraestructura
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -33,8 +33,15 @@ jobs:
       - name: Impedir estados y secretos locales versionados
         shell: bash
         run: |
-          forbidden_files='(^|/)(\.env|.*\.tfstate|.*\.pem|.*\.key|age-key\.txt)$'
+          forbidden_files='(^|/)(\.env|.*\.tfstate|.*\.pem|.*\.key|.*\.agekey|age-key\.txt)$'
           if git ls-files | grep -E "$forbidden_files"; then
             echo 'Hay un fichero sensible o de estado versionado.' >&2
             exit 1
           fi
+      - name: Renderizar y validar los manifiestos de la aplicación
+        shell: bash
+        run: |
+          kubectl kustomize kubernetes/apps/production | \
+            docker run --rm -i \
+              ghcr.io/yannh/kubeconform@sha256:85dbef6b4b312b99133decc9c6fc9495e9fc5f92293d4ff3b7e1b30f5611823c \
+              -strict -summary

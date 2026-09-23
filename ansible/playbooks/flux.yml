@@ -1,0 +1,138 @@
+---
+- name: Bootstrap the Be Ciencia Flux GitOps controllers
+  hosts: beciencia_vps
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Require the local read-only Flux deploy key path
+      ansible.builtin.assert:
+        that:
+          - flux_deploy_key_path is defined
+          - flux_deploy_key_path | length > 0
+        fail_msg: >-
+          Run this playbook with -e
+          flux_deploy_key_path=/path/to/beciencia_flux_deploy_ed25519.
+
+  tasks:
+    - name: Download the pinned Flux CLI archive
+      ansible.builtin.get_url:
+        url: "https://github.com/fluxcd/flux2/releases/download/{{ flux_version }}/flux_{{ flux_version | regex_replace('^v', '') }}_linux_amd64.tar.gz"
+        dest: "/tmp/flux_{{ flux_version }}_linux_amd64.tar.gz"
+        checksum: "{{ flux_cli_archive_checksum }}"
+        mode: '0644'
+
+    - name: Install the pinned Flux CLI
+      ansible.builtin.unarchive:
+        src: "/tmp/flux_{{ flux_version }}_linux_amd64.tar.gz"
+        dest: /usr/local/bin
+        remote_src: true
+        include:
+          - flux
+        mode: '0755'
+      when: not ansible_check_mode
+
+    - name: Apply the minimum Flux controllers
+      ansible.builtin.shell: |
+        set -o pipefail
+        KUBECONFIG={{ k3s_kubeconfig_path }} /usr/local/bin/flux install \
+          --namespace={{ flux_namespace }} \
+          --components=source-controller,kustomize-controller \
+          --export | /usr/local/bin/k3s kubectl apply --server-side -f -
+      args:
+        executable: /bin/bash
+      register: flux_install
+      changed_when: "'created' in flux_install.stdout or 'configured' in flux_install.stdout"
+      when: not ansible_check_mode
+
+    - name: Create the Flux key directory
+      ansible.builtin.file:
+        path: /etc/beciencia/flux
+        state: directory
+        owner: root
+        group: root
+        mode: '0700'
+      when: not ansible_check_mode
+
+    - name: Copy the Flux private deploy key to the VPS
+      ansible.builtin.copy:
+        src: "{{ flux_deploy_key_path }}"
+        dest: /etc/beciencia/flux/identity
+        owner: root
+        group: root
+        mode: '0600'
+      no_log: true
+      when: not ansible_check_mode
+
+    - name: Copy the Flux public deploy key to the VPS
+      ansible.builtin.copy:
+        src: "{{ flux_deploy_key_path }}.pub"
+        dest: /etc/beciencia/flux/identity.pub
+        owner: root
+        group: root
+        mode: '0644'
+      when: not ansible_check_mode
+
+    - name: Install GitHub's verified SSH host key
+      ansible.builtin.copy:
+        dest: /etc/beciencia/flux/known_hosts
+        content: "{{ flux_github_known_host }}\n"
+        owner: root
+        group: root
+        mode: '0644'
+      when: not ansible_check_mode
+
+    - name: Verify read-only access to the infrastructure repository
+      ansible.builtin.command:
+        argv:
+          - git
+          - ls-remote
+          - --heads
+          - "{{ flux_git_url }}"
+          - "refs/heads/{{ flux_git_branch }}"
+      environment:
+        GIT_SSH_COMMAND: >-
+          ssh -i /etc/beciencia/flux/identity
+          -o IdentitiesOnly=yes
+          -o UserKnownHostsFile=/etc/beciencia/flux/known_hosts
+          -o StrictHostKeyChecking=yes
+          -o BatchMode=yes
+          -o ConnectTimeout=10
+      changed_when: false
+      when: not ansible_check_mode
+
+    - name: Create the Flux Git authentication secret
+      ansible.builtin.shell: |
+        set -o pipefail
+        /usr/local/bin/k3s kubectl --namespace {{ flux_namespace }} create secret generic flux-system \
+          --from-file=identity=/etc/beciencia/flux/identity \
+          --from-file=identity.pub=/etc/beciencia/flux/identity.pub \
+          --from-file=known_hosts=/etc/beciencia/flux/known_hosts \
+          --dry-run=client --output=yaml | /usr/local/bin/k3s kubectl apply -f -
+      args:
+        executable: /bin/bash
+      register: flux_git_secret
+      changed_when: "'created' in flux_git_secret.stdout or 'configured' in flux_git_secret.stdout"
+      no_log: true
+      when: not ansible_check_mode
+
+    - name: Apply the Flux main-branch synchronization definition
+      ansible.builtin.copy:
+        src: ../../kubernetes/clusters/production/flux-system/gotk-sync.yaml
+        dest: /tmp/beciencia-flux-sync.yaml
+        owner: root
+        group: root
+        mode: '0600'
+      when: not ansible_check_mode
+
+    - name: Start Flux synchronization from main
+      ansible.builtin.command:
+        argv:
+          - /usr/local/bin/k3s
+          - kubectl
+          - apply
+          - --server-side
+          - --filename=/tmp/beciencia-flux-sync.yaml
+      register: flux_sync_apply
+      changed_when: "'created' in flux_sync_apply.stdout or 'configured' in flux_sync_apply.stdout"
+      when: not ansible_check_mode

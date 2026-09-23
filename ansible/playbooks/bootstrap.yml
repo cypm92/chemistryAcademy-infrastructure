@@ -1,0 +1,143 @@
+---
+- name: Prepare and secure the Be Ciencia production VPS
+  hosts: beciencia_vps
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Assert that the target is Ubuntu
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.distribution == 'Ubuntu'
+        fail_msg: This playbook is designed for an Ubuntu VPS.
+
+  tasks:
+    - name: Update the APT package cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install base security packages
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - fail2ban
+          - git
+          - ufw
+          - unattended-upgrades
+        state: present
+
+    - name: Configure automatic security updates
+      ansible.builtin.copy:
+        dest: /etc/apt/apt.conf.d/20auto-upgrades
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          APT::Periodic::Update-Package-Lists "1";
+          APT::Periodic::Unattended-Upgrade "1";
+
+    - name: Lock the password of the administrative user
+      ansible.builtin.user:
+        name: "{{ admin_user }}"
+        password_lock: true
+
+    - name: Disable direct root password access
+      ansible.builtin.user:
+        name: root
+        password_lock: true
+
+    - name: Install hardened SSH configuration before cloud-init settings
+      ansible.builtin.copy:
+        # sshd uses the first value it encounters for these settings. Ubuntu's
+        # cloud-init drop-in can enable password authentication, so this file
+        # must sort before it rather than after it.
+        dest: /etc/ssh/sshd_config.d/00-beciencia-hardening.conf
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          PermitRootLogin no
+          PasswordAuthentication no
+          KbdInteractiveAuthentication no
+          PubkeyAuthentication yes
+          PermitEmptyPasswords no
+          X11Forwarding no
+          AllowUsers {{ admin_user }}
+          MaxAuthTries 3
+          LoginGraceTime 30
+          ClientAliveInterval 300
+          ClientAliveCountMax 2
+      notify: Restart SSH
+
+    - name: Validate complete SSH server configuration
+      ansible.builtin.command: /usr/sbin/sshd -t
+      changed_when: false
+
+    - name: Remove legacy SSH hardening drop-in
+      ansible.builtin.file:
+        path: /etc/ssh/sshd_config.d/99-beciencia-hardening.conf
+        state: absent
+      notify: Restart SSH
+
+    - name: Configure Fail2ban for SSH
+      ansible.builtin.copy:
+        dest: /etc/fail2ban/jail.d/sshd.local
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          [sshd]
+          enabled = true
+          maxretry = 5
+          findtime = 10m
+          bantime = 1h
+      notify: Restart Fail2ban
+
+    - name: Set UFW default incoming policy to deny
+      community.general.ufw:
+        direction: incoming
+        default: deny
+      # UFW's module cannot safely predict its first-run state before the
+      # package exists. It is deliberately applied only in a real run.
+      when: not ansible_check_mode
+
+    - name: Set UFW default outgoing policy to allow
+      community.general.ufw:
+        direction: outgoing
+        default: allow
+      when: not ansible_check_mode
+
+    - name: Allow SSH before enabling the firewall
+      community.general.ufw:
+        rule: allow
+        port: "{{ ssh_port }}"
+        proto: tcp
+      when: not ansible_check_mode
+
+    - name: Allow public web traffic
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop: "{{ ssh_allowed_tcp_ports }}"
+      when: not ansible_check_mode
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
+      when: not ansible_check_mode
+
+  handlers:
+    - name: Restart SSH
+      ansible.builtin.service:
+        name: ssh
+        state: restarted
+      when: not ansible_check_mode
+
+    - name: Restart Fail2ban
+      ansible.builtin.service:
+        name: fail2ban
+        state: restarted
+      when: not ansible_check_mode

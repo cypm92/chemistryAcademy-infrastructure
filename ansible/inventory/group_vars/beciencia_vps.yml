@@ -1,0 +1,35 @@
+---
+# Ubuntu is the initial OVH user. It remains the single administrative user,
+# authenticated exclusively with the SSH key installed before this playbook runs.
+admin_user: ubuntu
+ssh_port: 22
+# Avoid the SFTP issue that can occur when Ansible is launched from WSL against
+# a repository mounted from Windows. This still uses the encrypted SSH channel.
+ansible_ssh_transfer_method: piped
+ssh_allowed_tcp_ports:
+  - 80
+  - 443
+
+# Se fija una versión concreta para que una reconstrucción no descargue una
+# versión distinta de Kubernetes de forma silenciosa. Las actualizaciones se
+# harán en un cambio independiente y revisado.
+k3s_version: v1.35.4+k3s1
+k3s_config_dir: /etc/rancher/k3s
+k3s_kubeconfig_path: /etc/rancher/k3s/k3s.yaml
+k3s_admin_kubeconfig_path: "/home/{{ admin_user }}/.kube/config"
+
+flux_version: v2.9.5
+flux_cli_archive_checksum: sha256:b853df82adfd7736f580692f9f734473d571606307139f8fd20c2a80dd1ff473
+flux_namespace: flux-system
+flux_git_url: ssh://git@github.com/cypm92/chemistryAcademy-infrastructure.git
+flux_git_branch: main
+flux_sync_path: ./kubernetes/clusters/production
+flux_github_known_host: github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+
+# SOPS uses this age identity on the VPS. The recovery copy is deliberately
+# supplied at playbook runtime and never belongs in this repository.
+sops_age_key_path: /etc/beciencia/sops/age.agekey
+sops_age_secret_name: sops-age
+
+# Deliberately no secrets belong in this repository. Application credentials
+# will be encrypted with SOPS in a later stage.

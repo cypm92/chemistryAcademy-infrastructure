@@ -1,0 +1,7 @@
+---
+# This recipient is public. The matching private age identity lives only in
+# the Flux `sops-age` Secret and in the ignored WSL recovery copy.
+creation_rules:
+  - path_regex: ^kubernetes/.*\.sops\.ya?ml$
+    encrypted_regex: '^(data|stringData)$'
+    age: age129qj8cex6k07rdet6daddzwp7kqaarudzxgfe3l09sptlrwsafeq3mskqt

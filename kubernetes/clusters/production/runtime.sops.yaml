@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: beciencia-runtime
+    namespace: beciencia
+type: Opaque
+stringData:
+    POSTGRES_PASSWORD: ENC[AES256_GCM,data:exGGguXhczIMyQOJ3KBJYfaxu6hhnFyH2tTIePOEzuYd2Ks3eg1C4JGu5yveepaz,iv:aXosJhfHRJH169m4DDGkvRK5bVId4foStLLVHgBVvuM=,tag:hIgge/oZHLHmo2Vw4nj9ng==,type:str]
+    DATABASE_URL: ENC[AES256_GCM,data:6rVYtYNZkWItUrp09mfnyBIELnvITT4/xNtFFEsyKOHclAmfhqFWcc80CyPj4ikQEF+g2mCWY1ecXgtDqRYGp1PRR/Ipp9XMwH1X56cTnOlkTZ/rVaT03gi5vWQhtO3DH5OIayGSMuH3cP1fiAuk/g==,iv:ukL1SibXePxFnQqRPDWP4AB5eXmIU7Lgw24ygaojCQw=,tag:vFmMDz9uIVV1JYTC/7kB2Q==,type:str]
+    SECRET_KEY: ENC[AES256_GCM,data:eko+houN2IrKpill5EBr77FMdpbKZz5gRXkUYog/hGMw1byijnUFJKj7AjetLxPMKYVpBcWqFLI5lvUbiR5gvw==,iv:0rY38A+zkeS33PUCv7iBhxerDxzlO4o8bvGJl54AIvo=,tag:rDl2vleVLHdbQ4XdDCAIEg==,type:str]
+    ADMIN_PASSWORD: ENC[AES256_GCM,data:GAMGCZ22DDlO91ZEeixtEwtHNG+rd88r,iv:qwSzvgyVhUxhNPIhWnTiPhOK61zaE0Fc9DWAdADwmvw=,tag:JIL6WpeSboSaXLV4qtXNXw==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBxbFdHQkx5c1F6d2czYVIx
+            WWhPUU5Wam8xdlVlR3M1aFV1WUt6eFBhamswCnpxK0tCajI3dXYvR0xKQWZOY05S
+            SkpaQ0k4Q2VVQURTNTVhTjh0ZStKQkkKLS0tIEsvS2VhL3huT3FoT2FrMHpPT0hO
+            TGZEdCt0NWhNc2loVHd2OFdSN2lxdkkKiguQSR1UeJ+VBawpKBxVu0LN3PaVzdjI
+            JMGdFIk+R/oJi7dy1mKGrkCGih1RXaE5qalXdfZjQR1d/+2VrTMtDw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age129qj8cex6k07rdet6daddzwp7kqaarudzxgfe3l09sptlrwsafeq3mskqt
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-09-22T22:47:03Z"
+    mac: ENC[AES256_GCM,data:k+enZQC5g8hh86+4w47zS/6KWW6nPLqb6pZ83BSalQtKJQzIQeC5O3Qo4lCjX9SdnJHr5/GwkbFNI1mh9tOK9JPf6O2usrm6k5LkFst95wB5XcsMJ8VfY1jibNG8EHL36MCyc7nyMtIyr9OVjrCYsfSIQp7e5W8ZzpUw/jTQGlc=,iv:CbV7vl6Xq/JS8F7b8HDJdee9wtJg/HTJ68Bk1a/rKK0=,tag:7Pf61SweBozkGRJfohaCnw==,type:str]
+    version: 3.13.3

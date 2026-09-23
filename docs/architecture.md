@@ -9,8 +9,7 @@ Un VPS OVH VPS-1 ejecutará K3s en un único nodo. Es una configuración adecuad
 | Componente | Responsabilidad | Ubicación |
 | --- | --- | --- |
 | K3s | Orquestación de contenedores | VPS Ubuntu |
-| Traefik | Entrada HTTP/HTTPS del clúster | K3s |
-| cert-manager | Certificados Let's Encrypt | K3s, cuando exista dominio |
+| Caddy | Entrada HTTP/HTTPS y certificados Let's Encrypt | VPS, cuando exista dominio |
 | Frontend | Aplicación web Vue | Deployment Kubernetes |
 | Backend | API FastAPI | Deployment Kubernetes, interno salvo rutas API |
 | PostgreSQL | Datos transaccionales | StatefulSet y volumen persistente del VPS |
@@ -21,7 +20,7 @@ Un VPS OVH VPS-1 ejecutará K3s en un único nodo. Es una configuración adecuad
 ## Límites de red
 
 ```text
-Internet → HTTPS / Ingress → frontend y API
+Internet → HTTPS / Caddy → frontend y API
                                 │
                                 ├── PostgreSQL (solo red interna)
                                 └── Object Storage (S3 mediante credenciales)
