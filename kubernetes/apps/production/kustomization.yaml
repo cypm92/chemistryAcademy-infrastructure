@@ -1,9 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# This composition is intentionally not referenced by clusters/production yet.
-# It becomes deployable only after the real SOPS secret and immutable GHCR image
-# digests have been added in the following deployment task.
+# The production cluster references this composition after the SOPS secrets and
+# immutable GHCR image tags have been verified.
 resources:
   - namespace.yaml
   - settings-configmap.yaml
