@@ -48,3 +48,5 @@ jobs:
       - name: Renderizar la composición completa de producción
         shell: bash
         run: kubectl kustomize kubernetes/clusters/production > /dev/null
+      - name: Probar la lógica de promoción de imágenes
+        run: python3 -m unittest discover -s scripts -p 'test_promote_images.py' -v

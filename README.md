@@ -41,13 +41,18 @@ está expuesta públicamente. No se ha creado ningún recurso de pago adicional.
 develop ──PR/merge──> main ──> GitHub Actions construye imágenes en GHCR
                                       │
                                       ▼
-                       actualiza la referencia inmutable en este repositorio
+                       propone la referencia inmutable en develop
+                                      │
+                                      ▼
+                       revisión/merge a main de infraestructura
                                       │
                                       ▼
                               Flux CD sincroniza K3s
 ```
 
 `develop` ejecutará validaciones, pero no publicará ni desplegará producción. Un revert de Git sobre la referencia de imagen permitirá volver a una versión previa.
+La promoción programada y su activación se documentan en
+[`docs/image-promotion.md`](docs/image-promotion.md).
 
 ## Principios de seguridad
 
@@ -64,8 +69,7 @@ develop ──PR/merge──> main ──> GitHub Actions construye imágenes en
 
 ## Siguiente tarea
 
-Verificar en OVHcloud el estado y la fecha de la última copia Standard y
-preparar un ensayo de restauración sin afectar producción. Después,
-automatizar la actualización de las etiquetas inmutables en este repositorio
-tras publicar nuevas imágenes en GHCR. El dominio, HTTPS y la exposición
-pública quedan para el último paso.
+Verificar en OVHcloud el estado y la fecha de la última copia Standard,
+preparar un ensayo de restauración sin afectar producción y activar la
+promoción automática de imágenes con una credencial limitada. El dominio,
+HTTPS y la exposición pública quedan para el último paso.
