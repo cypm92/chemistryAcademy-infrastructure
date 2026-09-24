@@ -8,9 +8,12 @@ se crea una copia diaria del VPS y se conserva durante 24 horas. No hay una
 copia independiente de PostgreSQL ni de los archivos en otro proveedor. Los
 volúmenes persistentes de K3s residen en el disco del mismo VPS.
 
-**Pendiente de verificar en el panel:** fecha, hora y estado de la última copia
-del VPS `vps-d7b2e60f.vps.ovh.net`. No debe considerarse probada una
-restauración hasta completar un ensayo controlado. La pérdida potencial de
+**Última comprobación en el panel (24-09-2026):** el VPS
+`vps-d7b2e60f.vps.ovh.net` mostraba Standard y un punto de restauración
+creado el 23-09-2026 a las 14:26. El horario programado era 14:26 UTC.
+Esto verifica que había una copia visible, **no su integridad ni una
+restauración exitosa**. Debe repetirse la comprobación periódicamente.
+La pérdida potencial de
 datos puede acercarse a 24 horas; un error descubierto después de que se
 reemplace la única copia ya no podrá deshacerse con este servicio.
 
@@ -98,5 +101,5 @@ autorización previa.
 Una prueba real debe restaurar una copia sin sobrescribir producción, arrancar
 PostgreSQL y la aplicación, y validar registros y archivos anteriores a la
 copia. Si para ello hace falta otro VPS o almacenamiento, solicitar aprobación
-del coste antes de contratarlo. Hasta entonces, el estado es **copia disponible
-por verificar; restauración no ensayada**.
+del coste antes de contratarlo. Hasta entonces, el estado es **última copia
+visible verificada el 24-09-2026; restauración no ensayada**.

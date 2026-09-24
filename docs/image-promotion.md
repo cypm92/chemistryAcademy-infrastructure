@@ -25,7 +25,7 @@ garantiza despliegue inmediato. El workflow es gratuito con runners estándar
 para estos repositorios públicos, según la [política de facturación de
 GitHub](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
 
-## Activación pendiente
+## Credencial de promoción
 
 La automatización usa el secreto de Actions `INFRA_PROMOTION_TOKEN` guardado
 en el *environment* del mismo nombre dentro del repositorio de
@@ -50,6 +50,11 @@ desde Actions para comprobar que informa «No hay imágenes nuevas que proponer�
 Las etiquetas actuales ya coinciden con las últimas publicaciones de `main`.
 Después, una publicación nueva abrirá la PR. Revisar que contiene únicamente
 las imágenes esperadas antes de fusionarla.
+
+El secreto del environment se configuró el 24-09-2026. Una ejecución manual
+confirmó que el job pudo leer GitHub y que no había imágenes nuevas. El paso
+de escritura en `develop` y creación de PR se verificará con la próxima
+publicación real.
 
 ## Fallos y límites
 
