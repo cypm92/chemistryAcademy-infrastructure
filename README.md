@@ -57,11 +57,15 @@ develop ──PR/merge──> main ──> GitHub Actions construye imágenes en
   recuperación local ignorada por Git.
 - PostgreSQL no se expondrá a Internet.
 - El tráfico público será únicamente HTTPS cuando se conecte el dominio.
-- Las copias de seguridad y su restauración se probarán antes de considerar listo el entorno.
+- La estrategia provisional de recuperación utiliza el backup Standard incluido
+  de OVHcloud. Sus límites y el procedimiento están en
+  [`docs/disaster-recovery.md`](docs/disaster-recovery.md); su restauración aún
+  no se ha ensayado.
 
 ## Siguiente tarea
 
-Diseñar y probar copias de seguridad y restauración de PostgreSQL y archivos
-antes de abrir la web al público. Después, automatizar la actualización de las
-etiquetas inmutables en este repositorio tras publicar nuevas imágenes en GHCR.
-El dominio, HTTPS y la exposición pública quedan para el último paso.
+Verificar en OVHcloud el estado y la fecha de la última copia Standard y
+preparar un ensayo de restauración sin afectar producción. Después,
+automatizar la actualización de las etiquetas inmutables en este repositorio
+tras publicar nuevas imágenes en GHCR. El dominio, HTTPS y la exposición
+pública quedan para el último paso.
