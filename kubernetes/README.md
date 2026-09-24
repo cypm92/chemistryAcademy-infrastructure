@@ -13,8 +13,9 @@ clúster. Nunca se añade una clave privada ni un manifiesto en claro a Git.
 
 `clusters/production/` incluye la aplicación solo después de comprobar los
 dos Secrets reales cifrados con SOPS y las etiquetas de imagen inmutables
-`sha-<commit>` publicadas en GHCR. No contiene Ingress: todavía no hay acceso
-público ni dominio.
+`sha-<commit>` publicadas en GHCR. No contiene Ingress ni dominio. El acceso
+de pruebas se realiza mediante un túnel HTTPS temporal que se retirará antes
+de habilitar la entrada definitiva.
 
 Los dos Secrets son `beciencia-runtime` (base de datos, firma JWT y contraseña
 inicial de administración) y `ghcr-pull` (lectura de imágenes privadas). El

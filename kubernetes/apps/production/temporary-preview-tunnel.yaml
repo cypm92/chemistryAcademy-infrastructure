@@ -1,0 +1,47 @@
+# Acceso de pruebas sin dominio. La URL aleatoria se obtiene de los logs del pod.
+# No usar como entrada permanente de producción: Cloudflare no ofrece SLA aquí.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temporary-preview-tunnel
+  namespace: beciencia
+  labels:
+    app.kubernetes.io/name: temporary-preview-tunnel
+    app.kubernetes.io/part-of: beciencia
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: temporary-preview-tunnel
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: temporary-preview-tunnel
+        app.kubernetes.io/part-of: beciencia
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared@sha256:ff69a2225ad7c6f85ed84fbd5f3087df46202426b2388ec60214098e0adf05e9
+          imagePullPolicy: IfNotPresent
+          args:
+            - tunnel
+            - --no-autoupdate
+            - --url
+            - http://frontend.beciencia.svc.cluster.local:80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 150m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
