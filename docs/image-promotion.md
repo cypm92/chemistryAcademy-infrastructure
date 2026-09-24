@@ -27,8 +27,10 @@ GitHub](https://docs.github.com/en/billing/concepts/product-billing/github-actio
 
 ## Activación pendiente
 
-La automatización queda inactiva hasta añadir el secreto de Actions
-`INFRA_PROMOTION_TOKEN` al repositorio de **infraestructura**. Debe ser una
+La automatización usa el secreto de Actions `INFRA_PROMOTION_TOKEN` guardado
+en el *environment* del mismo nombre dentro del repositorio de
+**infraestructura**. El job declara ese environment con `deployment: false`:
+puede leer el secreto sin crear un registro de despliegue. Debe ser una
 credencial nueva y limitada exclusivamente a
 `cypm92/chemistryAcademy-infrastructure`, con permisos de repositorio:
 

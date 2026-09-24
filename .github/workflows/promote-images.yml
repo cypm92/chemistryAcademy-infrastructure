@@ -15,6 +15,9 @@ concurrency:
 jobs:
   promote:
     runs-on: ubuntu-latest
+    environment:
+      name: INFRA_PROMOTION_TOKEN
+      deployment: false
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
