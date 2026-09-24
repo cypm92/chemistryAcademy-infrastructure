@@ -9,3 +9,4 @@ resources:
   - postgres.yaml
   - backend.yaml
   - frontend.yaml
+  - temporary-preview-tunnel.yaml

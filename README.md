@@ -21,8 +21,10 @@ El VPS ya está preparado con Ansible y ejecuta K3s y Flux CD. Flux observa
 `main` de este repositorio y mantiene PostgreSQL, backend y frontend dentro
 del clúster. Los Secrets de producción están cifrados con SOPS + age y las
 imágenes se publican desde `main` de sus respectivos repositorios en paquetes
-privados de GHCR. No hay Ingress ni dominio configurado: la aplicación aún no
-está expuesta públicamente. No se ha creado ningún recurso de pago adicional.
+privados de GHCR. No hay Ingress ni dominio configurado. Para las pruebas de
+la academia se utiliza un [túnel HTTPS temporal](docs/temporary-preview.md)
+que puede cambiar de URL y no se considera una entrada de producción. No se
+ha creado ningún recurso de pago adicional.
 
 ## Estructura
 
@@ -61,7 +63,8 @@ La promoción programada y su activación se documentan en
   privada se conserva exclusivamente en el VPS/Flux y en una copia de
   recuperación local ignorada por Git.
 - PostgreSQL no se expondrá a Internet.
-- El tráfico público será únicamente HTTPS cuando se conecte el dominio.
+- El acceso temporal usa HTTPS; la entrada definitiva también exigirá HTTPS
+  cuando se conecte el dominio.
 - La estrategia provisional de recuperación utiliza el backup Standard incluido
   de OVHcloud. Sus límites y el procedimiento están en
   [`docs/disaster-recovery.md`](docs/disaster-recovery.md); su restauración aún
