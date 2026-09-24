@@ -72,7 +72,7 @@ La promoción programada y su activación se documentan en
 
 ## Siguiente tarea
 
-Verificar en OVHcloud el estado y la fecha de la última copia Standard,
-preparar un ensayo de restauración sin afectar producción y activar la
-promoción automática de imágenes con una credencial limitada. El dominio,
-HTTPS y la exposición pública quedan para el último paso.
+Preparar un ensayo de restauración sin afectar producción, verificar la
+promoción de imágenes con una publicación nueva y completar las pruebas
+funcionales. El dominio y la entrada pública definitiva con HTTPS quedan
+para el último paso; el túnel actual es solo para pruebas.
