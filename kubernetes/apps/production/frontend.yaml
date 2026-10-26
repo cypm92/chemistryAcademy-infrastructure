@@ -41,7 +41,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: frontend
-          image: ghcr.io/cypm92/beciencia-frontend:sha-4e5b8fa407a806b297f11da9a1a85cfa5df792dc
+          image: ghcr.io/cypm92/beciencia-frontend:sha-6b49413e3d876a6abec6c8ec35dee8c203a22d37
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
