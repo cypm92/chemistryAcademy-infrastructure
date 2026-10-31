@@ -62,9 +62,18 @@ Estos Secrets no se aplican por el mero hecho de crearlos. Se añadirán a
 `clusters/production/kustomization.yaml` al activar la aplicación, después de
 verificar que las imágenes existen con etiquetas `sha-<commit>`.
 
-La clave privada age que permite descifrar los ficheros se guarda fuera del
-repositorio, en el VPS y en la copia de recuperación de WSL creada en el paso
-anterior. Conserva esa copia también en una copia de seguridad externa cifrada.
+La clave privada age que permite descifrar los Secrets se guarda fuera del
+repositorio. En el WSL de esta configuración, su ubicación local es
+`$HOME/.config/beciencia/sops/age.agekey` (en esta máquina, bajo el home de
+WSL). Mantén sus permisos restringidos y una copia de recuperación cifrada;
+nunca la subas a Git ni la pegues en un chat. La copia de recuperación del VPS
+también debe mantenerse fuera del repositorio.
+
+El CLI de SOPS está instalado para el usuario WSL en `$HOME/.local/bin/sops`;
+no requiere `sudo`. El perfil de Ubuntu añade `~/.local/bin` al `PATH` cuando
+existe. El script `create-production-secrets.py` usa una imagen SOPS fijada de
+Docker solo para la creación inicial; no instala el CLI ni sirve para editar
+Secrets existentes.
 
 ## Verificar el acceso a las imágenes
 
@@ -73,7 +82,7 @@ raíz del repositorio:
 
 ```bash
 set -o pipefail
-SOPS_AGE_KEY_FILE=/ruta/privada/age.agekey sops decrypt \
+SOPS_AGE_KEY_FILE="$HOME/.config/beciencia/sops/age.agekey" sops decrypt \
   kubernetes/clusters/production/ghcr-pull.sops.yaml | \
   python3 scripts/verify-ghcr-access.py
 ```
@@ -83,3 +92,37 @@ comprueba que el token pertenece a `cypm92`, tiene `read:packages`, descarga
 ambas etiquetas inmutables y que las imágenes no son accesibles anónimamente.
 Solo imprime resultados, nunca las credenciales. Si alguna comprobación falla,
 no actives la aplicación todavía.
+
+## SMTP real
+
+El manifiesto de producción configura el envío real y exige `SMTP_PASSWORD` en
+el Secret `beciencia-runtime`. No fusiones el PR de infraestructura ni dejes
+que Flux lo aplique hasta que esta clave exista cifrada: sin ella el
+`notification-worker` no arrancará.
+
+Como el Secret ya existe y `create-production-secrets.py` se niega a
+sobrescribirlo, actualízalo con `sops edit` desde WSL y la raíz del repositorio:
+
+```bash
+export SOPS_AGE_KEY_FILE="$HOME/.config/beciencia/sops/age.agekey"
+sops edit kubernetes/clusters/production/runtime.sops.yaml
+```
+
+En el editor local, añade `SMTP_PASSWORD` bajo `stringData` con la contraseña
+de la cuenta SMTP OVH configurada como `SMTP_USERNAME`. Guarda y cierra; SOPS
+vuelve a cifrar los campos protegidos. No pegues la contraseña en el chat, una
+issue, un comentario de PR ni un archivo sin cifrar. Nunca edites el archivo
+con un editor que no invoque SOPS ni lo muestres con `cat` o `git diff`. Añade
+al PR únicamente el fichero `runtime.sops.yaml` cifrado; conserva la clave age
+fuera del repositorio.
+
+Si SOPS informa que no encuentra una identidad o no puede descifrar, no generes
+otra clave ni cambies `.sops.yaml`: detente y recupera la clave age original.
+
+
+Al iniciar, el worker enviará todas las notificaciones pendientes y las nuevas
+a sus destinatarios guardados: los avisos administrativos a
+`clases@beciencia.es` y las notificaciones de reserva/contacto a las
+direcciones correspondientes. La usuaria autorizó esos envíos para la prueba
+en producción. No saldrá ningún correo mientras este cambio siga en el PR sin
+fusionar y aplicar por Flux.

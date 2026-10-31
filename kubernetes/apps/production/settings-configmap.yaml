@@ -12,3 +12,10 @@ data:
   ADMIN_NAME: Cresko Puyana
   ADMIN_EMAIL: cresko.puyana@gmail.com
   STORAGE_DIR: /app/storage
+  SMTP_MODE: smtp
+  SMTP_HOST: smtp.mail.ovh.net
+  SMTP_PORT: "465"
+  SMTP_SENDER: clases@beciencia.es
+  SMTP_USERNAME: clases@beciencia.es
+  SMTP_STARTTLS: "false"
+  SMTP_SSL: "true"

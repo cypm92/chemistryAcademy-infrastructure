@@ -4,16 +4,20 @@
 
 El workflow `.github/workflows/promote-images.yml` se ejecuta cada 15 minutos
 o manualmente. Para frontend y backend consulta el commit actual de `main`,
-comprueba que el workflow de CI de ese mismo commit terminó correctamente y
-que su tarea **Publicar imagen de producción en GHCR** tuvo éxito. Solo
-entonces actualiza en `develop` de este repositorio la etiqueta inmutable
-`sha-<commit>` del manifiesto correspondiente.
+comprueba que su CI de ese mismo commit terminó correctamente y que la tarea
+**Publicar imagen de producción en GHCR** tuvo éxito. Solo entonces actualiza en
+`develop` las etiquetas inmutables `sha-<commit>` de los manifiestos.
 
-Si hay cambios, abre o actualiza una PR de `develop` a `main`. **La PR no se
-fusiona automáticamente**: una persona debe revisar y fusionar, y solo al
-llegar a `main` Flux despliega el cambio. Si la CI de la aplicación falla o
-sigue en curso, no se promueve la imagen. Las imágenes de `develop` de las
-aplicaciones nunca se consideran.
+La imagen backend se actualiza en ambos Deployments: `backend.yaml` y
+`notification-worker.yaml`. Comparten el mismo paquete/commit porque el worker
+usa el módulo Python del backend. La imagen frontend se actualiza en
+`frontend.yaml`. Las imágenes de `develop` de las aplicaciones nunca se
+consideran.
+
+Si hay cambios, el workflow abre o actualiza una PR de `develop` a `main`. La
+PR no se fusiona automáticamente: una persona debe revisarla y fusionarla para
+que Flux despliegue el cambio. Si CI de la aplicación falla o sigue en curso,
+no se promueve la imagen.
 
 `kubernetes/clusters/production/image-promotion-state.json` guarda el último
 commit de aplicación ya procesado. Por eso una reversión manual que cambie

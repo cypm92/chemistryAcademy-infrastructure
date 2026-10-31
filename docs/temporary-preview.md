@@ -23,9 +23,15 @@ responden y que el frontend muestra la portada. No probar reservas reales de
 alumnos para un simple chequeo. El enlace se debe compartir por un canal
 privado y retirar al terminar las pruebas.
 
-Para desactivar el acceso, eliminar `temporary-preview-tunnel.yaml` de
-`kubernetes/apps/production/kustomization.yaml` en `develop`, fusionar la PR a
-`main` y esperar a que Flux borre el Deployment. Este procedimiento sustituye
-al enlace temporal anterior que dependía del ordenador local.
+Para activar el dominio de producción, la composición GitOps retirará este
+Deployment al mismo tiempo que crea el ingreso Caddy. No se mantendrán los dos
+accesos públicos activos simultáneamente y puede haber una interrupción hasta
+que DNS resuelva al VPS y Caddy obtenga su certificado. Esto es aceptable para
+la puesta en marcha inicial; no compartas enlaces temporales durante el corte.
+
+El cambio se hace quitando `temporary-preview-tunnel.yaml` de
+`kubernetes/apps/production/kustomization.yaml` en `develop`, revisando y
+fusionando la PR a `main`, y esperando a que Flux reconcilie. La declaración
+actualizada ya omite el túnel; no apliques manifiestos manualmente en producción.
 
 Documentación: [Quick Tunnels de Cloudflare](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/trycloudflare/).
