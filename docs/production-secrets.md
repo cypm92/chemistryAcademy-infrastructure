@@ -83,3 +83,32 @@ comprueba que el token pertenece a `cypm92`, tiene `read:packages`, descarga
 ambas etiquetas inmutables y que las imágenes no son accesibles anónimamente.
 Solo imprime resultados, nunca las credenciales. Si alguna comprobación falla,
 no actives la aplicación todavía.
+
+## SMTP real
+
+El manifiesto de producción configura el envío real y exige `SMTP_PASSWORD` en
+el Secret `beciencia-runtime`. No fusiones el PR de infraestructura ni dejes
+que Flux lo aplique hasta que esta clave exista cifrada: sin ella el
+`notification-worker` no arrancará.
+
+Como el Secret ya existe y `create-production-secrets.py` se niega a
+sobrescribirlo, actualízalo localmente con SOPS desde WSL, usando la clave age
+privada que ya tienes fuera del repositorio:
+
+```bash
+SOPS_AGE_KEY_FILE=/ruta/privada/age.agekey sops edit \
+  kubernetes/clusters/production/runtime.sops.yaml
+```
+
+En el editor local, añade `SMTP_PASSWORD` bajo `stringData` con la contraseña
+de la cuenta SMTP OVH configurada como `SMTP_USERNAME`. Guarda y cierra para
+que SOPS vuelva a cifrar el fichero. No pegues la contraseña en el chat, una
+issue, un comentario de PR ni un archivo sin cifrar. Añade únicamente el
+fichero `runtime.sops.yaml` cifrado al PR; no muestres su diff en texto.
+
+Al iniciar, el worker enviará todas las notificaciones pendientes y las nuevas
+a sus destinatarios guardados: los avisos administrativos a
+`clases@beciencia.es` y las notificaciones de reserva/contacto a las
+direcciones correspondientes. La usuaria autorizó esos envíos para la prueba
+en producción. No saldrá ningún correo mientras este cambio siga en el PR sin
+fusionar y aplicar por Flux.

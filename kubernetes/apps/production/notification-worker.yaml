@@ -41,7 +41,7 @@ spec:
                 secretKeyRef:
                   name: beciencia-runtime
                   key: SMTP_PASSWORD
-                  optional: true
+                  optional: false
             - name: SMTP_MODE
               valueFrom:
                 configMapKeyRef:
