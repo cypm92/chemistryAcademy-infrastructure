@@ -46,19 +46,17 @@ configuración declarativa vive en ConfigMap. El correo ACME es opcional y puede
 configurarse antes de activar. El HTTP-01 de Caddy requiere que el DNS público
 de ambos nombres apunte al VPS y TCP 80/443 llegue a él.
 
-Estado conocido al preparar este cambio: `beciencia.es` tiene A público
-`213.186.33.5`; el IPv4 confirmado del VPS es `51.254.216.174`. Por tanto no
-activar todavía la solicitud de certificados ni retirar el túnel. En el corte,
-actualizar solo los A web de apex y `www` a `51.254.216.174`; conservar MX,
-SPF, TXT, DNSSEC y demás registros de correo/verificación sin cambios. Verificar
-ambos nombres desde resolutores públicos y probar HTTP-01 antes de considerar
-completado el corte. La declaración GitOps requiere revisión y merge a `main`
-para que Flux la aplique; esta preparación no despliega nada.
-
-La configuración Caddy y el túnel temporal no deben estar activos a la vez:
-ambos reclaman el mismo frontend lógico y el túnel mantendría un camino público
-alternativo. Coordinar desactivación del túnel en el cambio de activación,
-después de aprobar y probar el acceso permanente; no quitarlo en esta preparación.
+Última comprobación pública durante la preparación (31 de octubre de 2026;
+reconfirmar justo antes del corte): `beciencia.es` y `www` resolvían a
+`213.186.33.5`; el IPv4 público del VPS, confirmado por el usuario en OVH, es
+`51.254.216.174`. Antes del corte, verificar que el firewall del proveedor deja
+llegar TCP 80/443 al VPS y que Caddy puede enlazarlos. Al fusionar la composición,
+Flux retirará el túnel temporal y creará Caddy; se acepta una interrupción hasta
+que los registros A de apex y `www` apunten a `51.254.216.174` y Caddy obtenga
+certificados. Cambiar solo esos A web; conservar MX, SPF, DKIM, DMARC, TXT,
+DNSSEC y demás registros de correo/verificación. Verificar ambos nombres desde
+resolutores públicos, HTTPS y `/api/health`. La declaración GitOps requiere
+revisión y merge a `main`; esta preparación no despliega ni cambia DNS.
 
 ## Recuperación
 

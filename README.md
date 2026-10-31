@@ -21,10 +21,10 @@ El VPS ya está preparado con Ansible y ejecuta K3s y Flux CD. Flux observa
 `main` de este repositorio y mantiene PostgreSQL, backend y frontend dentro
 del clúster. Los Secrets de producción están cifrados con SOPS + age y las
 imágenes se publican desde `main` de sus respectivos repositorios en paquetes
-privados de GHCR. No hay Ingress ni dominio configurado. Para las pruebas de
-la academia se utiliza un [túnel HTTPS temporal](docs/temporary-preview.md)
-que puede cambiar de URL y no se considera una entrada de producción. No se
-ha creado ningún recurso de pago adicional.
+privados de GHCR. En `main` aún no hay Ingress ni dominio activo; la rama `develop`
+prepara Caddy para la entrada permanente y, al activarlo, retirará el túnel
+HTTPS temporal. Se acepta una interrupción durante el corte. No se ha creado
+ningún recurso de pago adicional.
 
 ## Estructura
 
