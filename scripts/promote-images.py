@@ -20,11 +20,14 @@ STATE = ROOT / "kubernetes/clusters/production/image-promotion-state.json"
 APPS = {
     "backend": {
         "repository": "chemistryAcademy-backend",
-        "manifest": ROOT / "kubernetes/apps/production/backend.yaml",
+        "manifests": [
+            ROOT / "kubernetes/apps/production/backend.yaml",
+            ROOT / "kubernetes/apps/production/notification-worker.yaml",
+        ],
     },
     "frontend": {
         "repository": "chemistryAcademy-frontend",
-        "manifest": ROOT / "kubernetes/apps/production/frontend.yaml",
+        "manifests": [ROOT / "kubernetes/apps/production/frontend.yaml"],
     },
 }
 OWNER = "cypm92"
@@ -94,15 +97,17 @@ def main() -> int:
     state = json.loads(STATE.read_text(encoding="utf-8"))
     if set(state) != set(APPS):
         raise ValueError("El estado de promoción no coincide con las aplicaciones")
-    changes: dict[str, str] = {}
+    changes: dict[Path, str] = {}
+    promoted: dict[str, str] = {}
     for app, config in APPS.items():
         sha = published_main_sha(config["repository"], token)
         if state[app] == sha:
             print(f"{app}: sin nuevo commit publicado en main")
             continue
-        manifest = config["manifest"]
-        updated = replace_image(manifest.read_text(encoding="utf-8"), app, sha)
-        changes[app] = updated
+        for manifest in config["manifests"]:
+            updated = replace_image(manifest.read_text(encoding="utf-8"), app, sha)
+            changes[manifest] = updated
+        promoted[app] = sha
         print(f"{app}: nueva imagen publicada sha-{sha}")
 
     if not changes:
@@ -111,9 +116,9 @@ def main() -> int:
         print("Simulación: usa --apply para actualizar manifiestos y estado")
         return 0
 
-    for app, updated in changes.items():
-        APPS[app]["manifest"].write_text(updated, encoding="utf-8", newline="\n")
-        state[app] = re.search(r"beciencia-" + app + r":sha-([0-9a-f]{40})", updated).group(1)
+    for manifest, updated in changes.items():
+        manifest.write_text(updated, encoding="utf-8", newline="\n")
+    state.update(promoted)
     STATE.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8", newline="\n")
     return 0
 
