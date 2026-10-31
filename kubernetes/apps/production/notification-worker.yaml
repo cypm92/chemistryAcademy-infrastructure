@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-worker
+  namespace: beciencia
+  labels:
+    app.kubernetes.io/name: notification-worker
+    app.kubernetes.io/part-of: beciencia
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: notification-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: notification-worker
+        app.kubernetes.io/part-of: beciencia
+    spec:
+      automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: ghcr-pull
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: notification-worker
+          image: ghcr.io/cypm92/beciencia-backend:sha-733c7d77a4f39496ccea40ce433c256b8792ccac
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "app.notification_worker"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: beciencia-runtime
+                  key: DATABASE_URL
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: beciencia-runtime
+                  key: SMTP_PASSWORD
+                  optional: true
+            - name: SMTP_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: SMTP_MODE
+            - name: SMTP_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: SMTP_HOST
+            - name: SMTP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: SMTP_PORT
+            - name: SMTP_SSL
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: SMTP_SSL
+            - name: SMTP_STARTTLS
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: SMTP_STARTTLS
+            - name: SMTP_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: SMTP_USERNAME
+            - name: SMTP_SENDER
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: SMTP_SENDER
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 384Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

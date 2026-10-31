@@ -8,5 +8,7 @@ resources:
   - settings-configmap.yaml
   - postgres.yaml
   - backend.yaml
+  - notification-worker.yaml
   - frontend.yaml
+  - caddy-ingress.yaml
   - temporary-preview-tunnel.yaml
