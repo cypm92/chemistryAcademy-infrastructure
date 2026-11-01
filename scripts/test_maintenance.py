@@ -51,10 +51,10 @@ class MaintenanceRenderTest(unittest.TestCase):
             self.assertIn('beciencia.es/caddy-config-mode: maintenance-v1', state[deployment])
         self.assertIn('reverse_proxy', self.normal[config])
         self.assertNotIn('beciencia.es/caddy-config-mode', self.normal[deployment])
-        self.assertIn('beciencia.es/caddy-config-mode: maintenance-v1', self.cluster)
+        self.assertNotIn('beciencia.es/caddy-config-mode', self.cluster)
         cluster_resources = resources(self.cluster)
-        self.assertIn(' 503', cluster_resources[config])
-        self.assertNotIn('reverse_proxy', cluster_resources[config])
+        self.assertIn('reverse_proxy', cluster_resources[config])
+        self.assertNotIn(' 503', cluster_resources[config])
 
     def test_both_workloads_stopped_only_in_stopped_overlay(self):
         for name in ('backend', 'notification-worker'):
