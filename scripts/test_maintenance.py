@@ -52,10 +52,14 @@ class MaintenanceRenderTest(unittest.TestCase):
         self.assertIn('reverse_proxy', self.normal[config])
         self.assertNotIn('beciencia.es/caddy-config-mode', self.normal[deployment])
         self.assertNotIn('beciencia.es/caddy-config-mode', self.cluster)
+        cluster_resources = resources(self.cluster)
+        self.assertIn('reverse_proxy', cluster_resources[config])
+        self.assertNotIn(' 503', cluster_resources[config])
 
     def test_both_workloads_stopped_only_in_stopped_overlay(self):
         for name in ('backend', 'notification-worker'):
             key = ('Deployment', 'beciencia', name)
+            self.assertRegex(resources(self.cluster)[key], r'(?m)^  replicas: 1$')
             for state, expected in ((self.normal, 1), (self.gate, 1), (self.stopped, 0)):
                 self.assertRegex(state[key], rf'(?m)^  replicas: {expected}$')
             normal_image = re.search(r'^\s+image: (\S+)', self.normal[key], re.M)

@@ -1,6 +1,6 @@
 """Promote only images built successfully from each application's main branch.
 
-Run in an infrastructure checkout of develop. No credential is printed or saved.
+Run in an infrastructure checkout of main. No credential is printed or saved.
 """
 
 from __future__ import annotations

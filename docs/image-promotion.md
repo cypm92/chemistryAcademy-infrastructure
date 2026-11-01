@@ -1,5 +1,8 @@
 # Promoción de imágenes entre repositorios
 
+> AVISO: descripción histórica del flujo anterior; no activar. Consultar
+> `docs/image-promotion-repair.md` para el diseño nuevo y su activación segura.
+
 ## Qué hace
 
 El workflow `.github/workflows/promote-images.yml` se ejecuta cada 15 minutos
