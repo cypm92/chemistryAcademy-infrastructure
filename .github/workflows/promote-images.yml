@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: develop
+          ref: main
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-python@v5
@@ -34,26 +34,10 @@ jobs:
         shell: bash
         run: |
           if [ -z "$GH_TOKEN" ]; then
-            echo 'Sin INFRA_PROMOTION_TOKEN: automatización pendiente de activar.'
-            exit 0
+            echo 'Sin INFRA_PROMOTION_TOKEN: no se puede comprobar la promoción.' >&2
+            exit 1
           fi
           python -m unittest discover -s scripts -p 'test_promote_images.py' -v
-          python scripts/promote-images.py --apply
-          if git diff --quiet -- kubernetes/apps/production/backend.yaml kubernetes/apps/production/frontend.yaml kubernetes/apps/production/notification-worker.yaml kubernetes/clusters/production/image-promotion-state.json; then
-            echo 'No hay imágenes nuevas que proponer.'
-            exit 0
-          fi
-          git config user.name 'beciencia-promotion[bot]'
-          git config user.email 'beciencia-promotion[bot]@users.noreply.github.com'
-          git add kubernetes/apps/production/backend.yaml kubernetes/apps/production/frontend.yaml kubernetes/apps/production/notification-worker.yaml kubernetes/clusters/production/image-promotion-state.json
-          git commit -m 'Promote published main images'
-          gh auth setup-git
-          git push origin HEAD:develop
-          existing="$(gh pr list --base main --head develop --state open --json number --jq '.[0].number // empty')"
-          if [ -z "$existing" ]; then
-            gh pr create --base main --head develop \
-              --title 'Promover imágenes publicadas desde main' \
-              --body 'Actualiza las etiquetas SHA inmutables tras verificar que la CI y la publicación GHCR de frontend/backend finalizaron correctamente. Requiere revisión y merge a main para desplegar.'
-          else
-            echo "PR existente #$existing actualizado mediante develop."
-          fi
+          python -m unittest discover -s scripts -p 'test_promotion_branch.py' -v
+          python -m unittest discover -s scripts -p 'test_propose_flow.py' -v
+          bash scripts/propose-images.sh
