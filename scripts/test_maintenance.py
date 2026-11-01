@@ -59,7 +59,7 @@ class MaintenanceRenderTest(unittest.TestCase):
     def test_both_workloads_stopped_only_in_stopped_overlay(self):
         for name in ('backend', 'notification-worker'):
             key = ('Deployment', 'beciencia', name)
-            self.assertRegex(resources(self.cluster)[key], r'(?m)^  replicas: 0$')
+            self.assertRegex(resources(self.cluster)[key], r'(?m)^  replicas: 1$')
             for state, expected in ((self.normal, 1), (self.gate, 1), (self.stopped, 0)):
                 self.assertRegex(state[key], rf'(?m)^  replicas: {expected}$')
             normal_image = re.search(r'^\s+image: (\S+)', self.normal[key], re.M)
