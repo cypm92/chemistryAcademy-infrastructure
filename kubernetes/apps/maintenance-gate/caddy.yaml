@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: caddy-ingress-config
+  namespace: beciencia
+data:
+  Caddyfile: |
+    beciencia.es, www.beciencia.es {
+      header Retry-After "300"
+      header Cache-Control "no-store"
+      respond "Servicio temporalmente en mantenimiento. Vuelve a intentarlo más tarde." 503
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caddy-ingress
+  namespace: beciencia
+spec:
+  template:
+    metadata:
+      annotations:
+        beciencia.es/caddy-config-mode: maintenance-v1
