@@ -50,5 +50,9 @@ jobs:
         run: kubectl kustomize kubernetes/clusters/production > /dev/null
       - name: Probar la lógica de promoción de imágenes
         run: python3 -m unittest discover -s scripts -p 'test_promote_images.py' -v
+      - name: Probar la lógica de rama de promoción
+        run: python3 -m unittest discover -s scripts -p 'test_promotion_branch.py' -v
+      - name: Probar el flujo de promoción aislado
+        run: python3 -m unittest discover -s scripts -p 'test_propose_flow.py' -v
       - name: Probar los overlays de mantenimiento
         run: python3 -m unittest discover -s scripts -p 'test_maintenance.py' -v
