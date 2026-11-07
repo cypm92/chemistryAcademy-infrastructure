@@ -31,6 +31,33 @@ spec:
           imagePullPolicy: IfNotPresent
           command: ["python", "-m", "app.notification_worker"]
           env:
+            - name: MICROSOFT_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: beciencia-runtime
+                  key: MICROSOFT_TENANT_ID
+            - name: MICROSOFT_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: beciencia-runtime
+                  key: MICROSOFT_CLIENT_ID
+            - name: MICROSOFT_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: beciencia-runtime
+                  key: MICROSOFT_CLIENT_SECRET
+            - name: MICROSOFT_FERNET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: beciencia-runtime
+                  key: MICROSOFT_FERNET_KEY
+            - name: MICROSOFT_REDIRECT_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: beciencia-settings
+                  key: MICROSOFT_REDIRECT_URI
+            - name: MICROSOFT_SYNC_ENABLED
+              value: "false"
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
