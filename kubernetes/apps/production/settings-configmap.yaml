@@ -6,6 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/part-of: beciencia
 data:
+  MICROSOFT_REDIRECT_URI: https://beciencia.es/api/integrations/microsoft/callback
   POSTGRES_USER: chemistry
   POSTGRES_DB: chemistry_academy
   ACCESS_TOKEN_EXPIRE_MINUTES: "480"
