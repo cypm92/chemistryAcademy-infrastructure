@@ -17,3 +17,20 @@
 - Usa las comprobaciones documentadas en el repositorio y en CI, incluidas la generación/validación de manifiestos y las pruebas unitarias pertinentes.
 - Informa de los comandos exactos y sus resultados; diferencia una validación estática de un despliegue real.
 - Editar la configuración GitOps no significa que algo esté desplegado. La promoción y el despliegue a producción requieren autorización expresa del usuario y verificación posterior mediante lectura del estado.
+
+## Memoria del proyecto
+Las decisiones de producto y arquitectura de Chemistry Academy están en
+**`../02-DOCS/`**, un repositorio propio compartido por los tres componentes
+(`chemistryAcademy-docs`). Consúltalo antes de planear o implementar; no
+copies su contenido aquí, para que no existan dos versiones.
+
+- `../02-DOCS/índice.md` — inventario, mapa tecnológico y qué va en el brain.
+- `../02-DOCS/decisiones.md` — decisiones vigentes, con fuente y verificación.
+
+Cada decisión indica su estado de verificación: las marcadas como pendientes
+no son hechos comprobados. Al implementar una decisión, **cita su
+identificador** —`DEC-004`, por ejemplo— en el mensaje del commit.
+
+La metodología de trabajo —reparto de roles, planificación, pruebas y
+revisión— la aporta el perfil de Hermes que coordina el proyecto, no este
+archivo.
