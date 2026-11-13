@@ -27,7 +27,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: notification-worker
-          image: ghcr.io/cypm92/beciencia-backend:sha-56b36e6538ff417d83a73c37a11907d1567fedcd
+          image: ghcr.io/cypm92/beciencia-backend:sha-b56a6d63b919c5d44222d6f633e0fb30d9d3fabe
           imagePullPolicy: IfNotPresent
           command: ["python", "-m", "app.notification_worker"]
           env:
