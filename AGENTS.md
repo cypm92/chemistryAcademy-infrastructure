@@ -2,7 +2,7 @@
 
 ## Alcance y flujo de trabajo
 - Este repositorio contiene infraestructura, CI/CD, Kubernetes, Ansible y configuración GitOps. Mantén los cambios dentro de él, salvo que se solicite explícitamente coordinar cambios con los repositorios de la aplicación.
-- Trabaja en la rama actual. No cambies de rama, crees commits, hagas push o merge, publiques imágenes, apliques cambios de infraestructura ni despliegues sin autorización expresa del usuario.
+- Trabaja en la rama actual; cambiar de rama requiere autorización. Para una feature acordada y validada localmente, DEC-006 autoriza de forma permanente commits, push a `develop` y apertura de PR hacia `main`, sin pedir permiso por cada paso; comprueba destinos, automatizaciones y cambios ajenos. No hagas merge ni despliegues sin autorización expresa; el usuario realiza el merge o autoriza esa operación. Publicar imágenes, hacer push a `main` o aplicar cambios de infraestructura requiere autorización expresa. Respeta confirmaciones reales y reglas superiores.
 - Antes de hacer cambios, revisa `git status` y la documentación/los flujos de trabajo pertinentes. Conserva todos los cambios existentes; nunca hagas reset ni limpies el repositorio.
 - Trata producción como un entorno activo y sensible. Prioriza validaciones estáticas y pruebas locales/unitarias; no contactes servidores ni servicios de producción sin autorización expresa.
 
