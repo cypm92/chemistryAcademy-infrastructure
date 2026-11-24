@@ -21,21 +21,28 @@ del host. Permanecen seccomp `RuntimeDefault` a nivel pod,
 solo las cinco existentes añadidas, y el acceso de PostgreSQL limitado a la
 red interna. No se deshabilita seccomp ni se modifica un sysctl global.
 
-## Validación obligatoria antes de fusionar o aplicar
+## Prueba excepcional en producción
 
-**No fusionar esta PR ni permitir su aplicación hasta validar con éxito el
-cambio en un entorno aislado representativo**, con kernel `7.0.0-43-generic`,
-k3s/runtime y configuración AppArmor representativos, y la misma imagen y
-configuración de PostgreSQL. La prueba debe comprobar el arranque real y que
-no persisten las denegaciones de señales observadas. No hay todavía prueba en
-un entorno representativo con ese kernel y k3s.
+El usuario autorizó expresamente usar la PR #63 como prueba directa en
+producción, **sin ensayo aislado y con la copia OVH sin verificar**, tras
+conocer la reducción del aislamiento y que revertir el YAML devuelve al
+PostgreSQL previamente indisponible. No hay todavía prueba en un entorno
+representativo con ese kernel y k3s; esta autorización no acredita que el
+cambio funcione ni que la copia sea recuperable.
 
 El valor observado `peer="cri-containerd.apparmor.d//&unconfined"` podría
 indicar apilamiento forzado: declarar el contenedor `Unconfined` podría no
 eludir una restricción AppArmor apilada del host. La lectura de `peer` por sí
 sola no demuestra que el perfil efectivo esté totalmente sin restricciones.
 
-**Si falla la prueba, no aplicar esta PR**. Investigar una alternativa, como
+Tras la promoción y aplicación mediante Flux, monitorizar si `gosu` avanza,
+si PostgreSQL alcanza `Ready` y si desaparecen las denegaciones de señales;
+comprobar también backend y worker, `/api/health` y el login. Registrar los
+resultados observados sin dar por recuperado ningún componente sin comprobarlo.
+
+Si no mejora, revertir el cambio GitOps mediante un commit y PR revisados, sin
+usar `kubectl apply`. La reversión devuelve al estado previo de indisponibilidad:
+**no recupera datos ni garantiza el login**. Investigar una alternativa, como
 un kernel/runtime corregido o un perfil acotado, bajo aprobación independiente.
 No tocar datos; las copias OVH vigentes no se han comprobado.
 
