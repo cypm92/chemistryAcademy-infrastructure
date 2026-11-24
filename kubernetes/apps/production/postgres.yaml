@@ -89,6 +89,8 @@ spec:
               cpu: "1"
               memory: 1Gi
           securityContext:
+            appArmorProfile:
+              type: Unconfined
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]

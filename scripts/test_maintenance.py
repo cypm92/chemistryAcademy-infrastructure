@@ -37,6 +37,19 @@ class MaintenanceRenderTest(unittest.TestCase):
         cls.stopped = resources(render('kubernetes/apps/maintenance-stopped'))
         cls.cluster = render('kubernetes/clusters/production')
 
+    def test_postgres_apparmor_exception_is_scoped(self):
+        postgres = ('StatefulSet', 'beciencia', 'postgres')
+        for state in (self.normal, resources(self.cluster)):
+            with self.subTest(render='cluster' if state is not self.normal else 'apps'):
+                doc = state[postgres]
+                # Kustomize emits this pod template with stable indentation. Match the
+                # container and pod contexts separately, not merely anywhere in YAML.
+                self.assertRegex(doc, r'(?ms)^      containers:\n      - .*?^        name: postgres\n.*?^        securityContext:\n          allowPrivilegeEscalation: false\n          appArmorProfile:\n            type: Unconfined\n          capabilities:\n            add:\n            - CHOWN\n            - DAC_OVERRIDE\n            - FOWNER\n            - SETGID\n            - SETUID\n            drop:\n            - ALL$')
+                self.assertRegex(doc, r'(?m)^      securityContext:\n        fsGroup: 999\n        fsGroupChangePolicy: OnRootMismatch\n        seccompProfile:\n          type: RuntimeDefault$')
+                for key, resource in state.items():
+                    self.assertEqual(len(re.findall(r'(?i)unconfined', resource)),
+                                     1 if key == postgres else 0, key)
+
     def test_inventory_is_identical(self):
         self.assertEqual(self.normal.keys(), self.gate.keys())
         self.assertEqual(self.normal.keys(), self.stopped.keys())
